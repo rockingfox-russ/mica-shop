@@ -33,6 +33,20 @@ foreach ($includes as $file) {
     }
 }
 
+/* GitHub theme updates — admin only, zero frontend cost */
+if (is_admin()) {
+    $puc_path = mica_DIR . '/inc/lib/plugin-update-checker/load-v5p5.php';
+    if (file_exists($puc_path)) {
+        require_once $puc_path;
+        $update_checker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+            'https://github.com/rockingfox-russ/mica-shop/',
+            __FILE__,
+            'mica-shop'
+        );
+        $update_checker->setBranch('master');
+    }
+}
+
 function mica_filter_empty_branches(&$categories) {
     $categories = array_filter($categories, function (&$cat) {
         if (!empty($cat['children'])) {
