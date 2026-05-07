@@ -1,0 +1,21 @@
+/*
+Theme Name:   micaonline
+Theme URI:    https://micaonline.co.za
+GitHub Theme URI: rockingfox-russ/mica-shop
+Description:  Clean, fast, DRY WooCommerce theme for micaonline hardware store. Orange/blue/yellow brand. Click & collect ready.
+Version:      1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 8.0
+Author:       micaonline
+License:      GPL-2.0-or-later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain:  micaonline
+Tags:         woocommerce, e-commerce, hardware, click-and-collect, custom-colors
+*/
+
+/*
+ * NOTE: All actual CSS lives in assets/css/ — loaded via wp_enqueue_style().
+ * This file intentionally left minimal to avoid WordPress loading it as a stylesheet.
+ * The child theme can override variables here if needed.
+ */
