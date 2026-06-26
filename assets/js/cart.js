@@ -88,10 +88,38 @@
     } );
   }
 
+  /* ── Checkout: force a shipping/rate refresh when address fields change ──
+   * WooCommerce core only auto-triggers update_checkout on country/state/postcode
+   * changes. Courier quotes (e.g. The Courier Guy) also depend on address_1/
+   * address_2/city, so without this the quoted rate from a blank/guessed
+   * address can carry over to checkout and never refresh. */
+  function initCheckoutAddressRefresh() {
+    if ( typeof jQuery === 'undefined' ) return;
+    const form = document.querySelector( 'form.woocommerce-checkout' );
+    if ( ! form ) return;
+
+    const selector = [
+      '#billing_address_1', '#billing_address_2', '#billing_city',
+      '#shipping_address_1', '#shipping_address_2', '#shipping_city',
+    ].join( ', ' );
+
+    let timer;
+    jQuery( document.body ).on( 'change input', selector, function () {
+      clearTimeout( timer );
+      timer = setTimeout( () => {
+        jQuery( document.body ).trigger( 'update_checkout' );
+      }, 1000 );
+    } );
+  }
+
   if ( document.readyState === 'loading' ) {
-    document.addEventListener( 'DOMContentLoaded', initCartQtyUpdate );
+    document.addEventListener( 'DOMContentLoaded', () => {
+      initCartQtyUpdate();
+      initCheckoutAddressRefresh();
+    } );
   } else {
     initCartQtyUpdate();
+    initCheckoutAddressRefresh();
   }
 
 } )();

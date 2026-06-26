@@ -31,6 +31,24 @@ function mica_ajax_add_to_cart(): void {
 }
 
 /**
+ * Ajax: Issue fresh nonces.
+ * Full-page/CDN caches can serve HTML long after WP nonces (24h lifetime)
+ * baked into that markup have expired, breaking every AJAX action on the
+ * page with "Security check failed". JS calls this once per load to get
+ * live nonces instead of trusting whatever the cached page shipped with.
+ */
+add_action( 'wp_ajax_mica_get_nonces',        'mica_ajax_get_nonces' );
+add_action( 'wp_ajax_nopriv_mica_get_nonces', 'mica_ajax_get_nonces' );
+
+function mica_ajax_get_nonces(): void {
+    nocache_headers();
+    wp_send_json_success( [
+        'filter_nonce' => wp_create_nonce( 'mica_filter_nonce' ),
+        'stock_nonce'  => wp_create_nonce( 'mica_stock_check' ),
+    ] );
+}
+
+/**
  * Ajax: Get product quick-view HTML.
  */
 add_action( 'wp_ajax_mica_quick_view',        'mica_ajax_quick_view' );
@@ -55,7 +73,12 @@ function mica_ajax_quick_view(): void {
         </div>
         <div style="flex:1;">
             <p style="font-size:.75rem;text-transform:uppercase;letter-spacing:.6px;color:var(--clr-text-muted);margin-bottom:.5rem;">
-                <?php $cats = get_the_terms( $product_id, 'product_cat' );
+                <?php
+                $cats = get_the_terms( $product_id, 'product_cat' );
+                if ( $cats && ! is_wp_error( $cats ) ) {
+                    $excluded = mica_get_excluded_cat_ids();
+                    $cats     = array_values( array_filter( $cats, fn( $t ) => ! in_array( $t->term_id, $excluded, true ) ) );
+                }
                 echo $cats ? esc_html( $cats[0]->name ) : ''; ?>
             </p>
             <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:.75rem;">

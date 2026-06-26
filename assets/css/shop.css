@@ -1,5 +1,8 @@
 /* shop.css — single product, cart, checkout, my account */
 
+.woocommerce-order-received .woocommerce-order-details, 
+.woocommerce-order-received .woocommerce-customer-details{display:none !important;}
+
 /* ════════════════════════════════════
    SINGLE PRODUCT
 ════════════════════════════════════ */
@@ -59,6 +62,7 @@
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 800;
   line-height: 1.2;
+  text-transform: capitalize;
 }
 .product-rating {
   display: flex;
@@ -349,6 +353,7 @@
 .cart-item-remove svg { width: 14px; height: 14px; }
 
 /* Cart summary */
+.shipping-row{flex-direction: column;}
 .cart-summary {
   background: var(--clr-white);
   border: 1px solid var(--clr-border);
@@ -762,6 +767,188 @@
 }
 
 /* ════════════════════════════════════
+   ORDER RECEIVED / THANK YOU
+════════════════════════════════════ */
+.thankyou-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-6);
+  padding: 0 0 var(--space-12);
+  align-items: start;
+}
+
+/* Hero banner */
+.thankyou-hero {
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  text-align: center;
+  margin-bottom: var(--space-6);
+  color: var(--clr-text);
+}
+.thankyou-hero--success {
+  background: linear-gradient(135deg, #e8f8ee 0%, #d4f0de 100%);
+  border: 1px solid #a8dab5;
+}
+.thankyou-hero--failed {
+  background: linear-gradient(135deg, #fdf0ee 0%, #fae0dc 100%);
+  border: 1px solid #f4bdb5;
+}
+.thankyou-hero--notice {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+}
+.thankyou-hero-icon {
+  width: 64px; height: 64px;
+  border-radius: var(--radius-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 auto var(--space-4);
+}
+.thankyou-hero--success .thankyou-hero-icon {
+  background: var(--clr-success);
+  color: var(--clr-white);
+}
+.thankyou-hero--failed .thankyou-hero-icon {
+  background: var(--clr-error);
+  color: var(--clr-white);
+}
+.thankyou-hero--notice .thankyou-hero-icon {
+  background: var(--clr-blue);
+  color: var(--clr-white);
+}
+.thankyou-hero-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  margin: 0 0 var(--space-3);
+  color: var(--clr-text);
+}
+.thankyou-hero-sub {
+  font-size: var(--font-size-base);
+  color: var(--clr-text-muted);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* Meta cards row */
+.thankyou-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.thankyou-meta-card {
+  background: var(--clr-white);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  color: var(--clr-text);
+}
+.thankyou-meta-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--clr-text-muted);
+  margin-bottom: var(--space-1);
+  font-weight: bold;
+  padding-right: 10px;
+}
+.thankyou-meta-value {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--clr-text);
+}
+.thankyou-total { color: var(--clr-orange) !important; }
+
+/* Status badge */
+.thankyou-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs) !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.thankyou-status--processing,
+.thankyou-status--on-hold   { background: var(--clr-warning-bg); color: var(--clr-warning); }
+.thankyou-status--completed { background: var(--clr-success-bg); color: var(--clr-success); }
+.thankyou-status--failed,
+.thankyou-status--cancelled { background: var(--clr-error-bg);   color: var(--clr-error);   }
+.thankyou-status--pending   { background: var(--clr-blue-light); color: var(--clr-blue);    }
+
+/* Address block */
+.thankyou-address {
+  font-style: normal;
+  font-size: var(--font-size-sm);
+  color: var(--clr-text);
+  line-height: 1.8;
+  margin: 0 0 var(--space-2);
+}
+.thankyou-address-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--clr-text-muted);
+  margin: var(--space-1) 0 0;
+}
+.thankyou-address-icon { font-size: 1rem; }
+.thankyou-payment-method {
+  font-size: var(--font-size-sm);
+  color: var(--clr-text);
+  margin: 0;
+}
+
+/* CTA buttons */
+.thankyou-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.thankyou-actions--center { justify-content: center; }
+.thankyou-actions .btn-primary,
+.thankyou-actions .btn-secondary {
+  display: inline-block;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.thankyou-actions .btn-primary {
+  background: var(--clr-orange);
+  color: var(--clr-white);
+}
+.thankyou-actions .btn-primary:hover { background: var(--clr-orange-dark); color: var(--clr-white); }
+.thankyou-actions .btn-secondary {
+  background: var(--clr-white);
+  color: var(--clr-text);
+  border: 1.5px solid var(--clr-border);
+}
+.thankyou-actions .btn-secondary:hover { border-color: var(--clr-orange); color: var(--clr-orange); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .thankyou-meta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .thankyou-layout { grid-template-columns: 1fr; }
+  .thankyou-hero { padding: var(--space-8) var(--space-5); }
+  .thankyou-hero-title { font-size: var(--font-size-2xl); }
+}
+@media (max-width: 480px) {
+  .thankyou-meta-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ════════════════════════════════════
    MY ACCOUNT
 ════════════════════════════════════ */
 .woocommerce-orders-table{
@@ -806,6 +993,181 @@
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
+}
+
+/* Store hint shown beneath "Out of stock online" on product cards */
+.product-card-store-hint {
+  font-size: var(--font-size-xs);
+  color: var(--clr-blue);
+  font-style: italic;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* ════════════════════════════════════
+   LOGIN / REGISTER (guest my-account)
+   WC outputs .col2-set > .u-column1 + .u-column2 inside .account-auth-wrap
+════════════════════════════════════ */
+.account-auth-wrap {
+  max-width: 960px;
+  margin: var(--space-8) auto var(--space-16);
+  padding: 0 var(--space-4);
+}
+
+/* Two-column split: login left, register right */
+#customer_login.col2-set {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.u-column1.col-1,
+.u-column2.col-2 {
+  max-width: none;    /* override Bootstrap .col-1/.col-2 8.33% max-width */
+  width: auto;
+  flex: none;
+  background: var(--clr-white);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+
+/* Column headings */
+.u-column1 h2,
+.u-column2 h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--clr-text);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--clr-border);
+}
+
+/* Form rows */
+.woocommerce-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+/* Labels */
+.woocommerce-form-row label,
+.woocommerce-form__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--clr-text);
+}
+.woocommerce-form-row label .required { color: var(--clr-orange); margin-left: 2px; }
+
+/* Inputs */
+.woocommerce-form-row .woocommerce-Input,
+.woocommerce-form-row input.input-text,
+.woocommerce-form-login .input-text,
+.woocommerce-form-register .input-text {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--clr-text);
+  background: var(--clr-bg);
+  font-family: inherit;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.woocommerce-form-login .input-text:focus,
+.woocommerce-form-register .input-text:focus {
+  outline: none;
+  border-color: var(--clr-orange);
+  background: var(--clr-white);
+  box-shadow: 0 0 0 3px rgba(232,89,12,.10);
+}
+
+/* "Remember me" row — inline checkbox + submit button */
+.woocommerce-form-login .form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+.woocommerce-form__label-for-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--clr-text-muted);
+  cursor: pointer;
+}
+.woocommerce-form__input-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--clr-orange);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Submit buttons */
+.woocommerce-form-login__submit,
+.woocommerce-form-register__submit,
+.woocommerce-Button.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-8);
+  background: var(--clr-orange);
+  color: var(--clr-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+}
+.woocommerce-form-login__submit:hover,
+.woocommerce-form-register__submit:hover,
+.woocommerce-Button.button:hover {
+  background: var(--clr-orange-dark);
+  color: var(--clr-white);
+}
+
+/* Register submit spans full width */
+.woocommerce-form-register .form-row {
+  margin-bottom: var(--space-2);
+}
+.woocommerce-form-register__submit { width: 100%; margin-top: var(--space-2); }
+
+/* Lost password link */
+.woocommerce-LostPassword {
+  font-size: var(--font-size-sm);
+  color: var(--clr-text-muted);
+  margin-top: var(--space-2);
+}
+.woocommerce-LostPassword a {
+  color: var(--clr-orange);
+  font-weight: 500;
+}
+.woocommerce-LostPassword a:hover { color: var(--clr-orange-dark); text-decoration: underline; }
+
+/* Privacy notice below register form */
+.woocommerce-privacy-policy-text {
+  font-size: var(--font-size-xs);
+  color: var(--clr-text-muted);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+.woocommerce-privacy-policy-text a { color: var(--clr-orange); }
+
+/* Stacked on mobile */
+@media (max-width: 700px) {
+  #customer_login.col2-set { grid-template-columns: 1fr; }
+  .u-column1.col-1,
+  .u-column2.col-2 { padding: var(--space-6); }
 }
 
 /* ════════════════════════════════════

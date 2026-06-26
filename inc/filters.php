@@ -47,14 +47,15 @@ function mica_build_query_args( array $params ): array {
     $p = wp_parse_args( $params, $defaults );
 
     $order_map = [
-        'menu_order' => [ 'orderby' => 'menu_order',      'order' => 'ASC'  ],
+        'title'      => [ 'orderby' => 'title',            'order' => 'ASC'  ],
+        'menu_order' => [ 'orderby' => 'title',            'order' => 'ASC'  ], // legacy alias → alphabetical
         'date'       => [ 'orderby' => 'date',             'order' => 'DESC' ],
         'price'      => [ 'orderby' => 'meta_value_num',   'meta_key' => '_price', 'order' => 'ASC'  ],
         'price-desc' => [ 'orderby' => 'meta_value_num',   'meta_key' => '_price', 'order' => 'DESC' ],
         'rating'     => [ 'orderby' => 'meta_value_num',   'meta_key' => '_wc_average_rating', 'order' => 'DESC' ],
         'popularity' => [ 'orderby' => 'meta_value_num',   'meta_key' => 'total_sales',        'order' => 'DESC' ],
     ];
-    $order_args = $order_map[ $p['orderby'] ] ?? $order_map['menu_order'];
+    $order_args = $order_map[ $p['orderby'] ] ?? $order_map['title'];
 
     $args = array_merge( [
         'post_type'      => 'product',
@@ -164,18 +165,20 @@ add_action( 'pre_get_posts', function ( WP_Query $q ) {
 
     // orderby
     $order_map = [
-        'menu_order' => [ 'orderby' => 'menu_order',      'order' => 'ASC'  ],
+        'title'      => [ 'orderby' => 'title',            'order' => 'ASC'  ],
+        'menu_order' => [ 'orderby' => 'title',            'order' => 'ASC'  ], // legacy alias
         'date'       => [ 'orderby' => 'date',             'order' => 'DESC' ],
         'price'      => [ 'orderby' => 'meta_value_num',   'meta_key' => '_price',              'order' => 'ASC'  ],
         'price-desc' => [ 'orderby' => 'meta_value_num',   'meta_key' => '_price',              'order' => 'DESC' ],
         'rating'     => [ 'orderby' => 'meta_value_num',   'meta_key' => '_wc_average_rating',  'order' => 'DESC' ],
         'popularity' => [ 'orderby' => 'meta_value_num',   'meta_key' => 'total_sales',         'order' => 'DESC' ],
     ];
-    $orderby_key = sanitize_text_field( $_GET['orderby'] ?? '' );
-    if ( isset( $order_map[ $orderby_key ] ) ) {
-        foreach ( $order_map[ $orderby_key ] as $k => $v ) {
-            $q->set( $k, $v );
-        }
+    // Always apply ordering — if we leave it unset, WooCommerce injects its own
+    // session-based ordering which causes different users to see different sorts.
+    $orderby_key = sanitize_text_field( $_GET['orderby'] ?? 'title' );
+    $resolved    = $order_map[ $orderby_key ] ?? $order_map['title'];
+    foreach ( $resolved as $k => $v ) {
+        $q->set( $k, $v );
     }
 
     $meta_query = [ 'relation' => 'AND' ];
@@ -245,7 +248,7 @@ function mica_ajax_filter_products(): void {
         'category_id'      => (int) ( $_POST['category_id'] ?? 0 ),
         'min_price'        => isset( $_POST['min_price'] ) && $_POST['min_price'] !== '' ? (float) $_POST['min_price'] : '',
         'max_price'        => isset( $_POST['max_price'] ) && $_POST['max_price'] !== '' ? (float) $_POST['max_price'] : '',
-        'orderby'          => sanitize_text_field( $_POST['orderby'] ?? 'menu_order' ),
+        'orderby'          => sanitize_text_field( $_POST['orderby'] ?? 'title' ),
         'tags'             => isset( $_POST['tags'] )             ? array_map( 'sanitize_text_field', (array) $_POST['tags'] ) : [],
         'attributes'       => isset( $_POST['attributes'] )       ? (array) $_POST['attributes'] : [],
         'local_attributes' => isset( $_POST['local_attributes'] ) ? (array) $_POST['local_attributes'] : [],
@@ -255,7 +258,15 @@ function mica_ajax_filter_products(): void {
         'paged'            => max( 1, (int) ( $_POST['paged'] ?? 1 ) ),
     ];
 
-    $query = new WP_Query( mica_build_query_args( $params ) );
+    $args = mica_build_query_args( $params );
+
+    // Preserve search context so AJAX pagination on search pages doesn't lose the query
+    $search = sanitize_text_field( wp_unslash( $_POST['search_query'] ?? '' ) );
+    if ( $search ) {
+        $args['s'] = $search;
+    }
+
+    $query = new WP_Query( $args );
 
     ob_start();
     if ( $query->have_posts() ) {
@@ -272,9 +283,17 @@ function mica_ajax_filter_products(): void {
     wp_reset_postdata();
     $html = ob_get_clean();
 
+    // Use the actual page URL sent by the browser as the pagination base.
+    // Without this, paginate_links() would base links on admin-ajax.php.
+    $base_url = esc_url_raw( wp_unslash( $_POST['current_url'] ?? '' ) );
+    if ( ! $base_url ) {
+        $base_url = get_permalink( wc_get_page_id( 'shop' ) );
+    }
+    $base_url = remove_query_arg( 'paged', $base_url );
+
     ob_start();
     echo paginate_links( [
-        'base'    => add_query_arg( 'paged', '%#%' ),
+        'base'    => add_query_arg( 'paged', '%#%', $base_url ),
         'format'  => '',
         'total'   => $query->max_num_pages,
         'current' => $params['paged'],

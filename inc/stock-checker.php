@@ -180,7 +180,6 @@ function mica_query_wp_tables_stock( string $sku ): array {
                 "SELECT `StoreName`, `StoreArea`, `Lat`, `Long`
                    FROM {$names_table}
                   WHERE `StoreCode` = %s
-                    AND `Lat` != 0
                   LIMIT 1",
                 $member_code
             ),

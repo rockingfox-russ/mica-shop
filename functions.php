@@ -1,12 +1,12 @@
 <?php
 /**
- * micaonline Theme — functions.php
+ * micaonline Theme â functions.php
  * Bootstraps all modular includes. Nothing performance-critical should be broken here.
  */
 
 defined('ABSPATH') || exit;
 
-define('mica_VERSION', '1.0.1');
+define('mica_VERSION', '1.0.11');
 define('mica_DIR', get_template_directory());
 define('mica_URI', get_template_directory_uri());
 
@@ -17,6 +17,7 @@ $includes = [
     'inc/menus.php',
     'inc/helpers.php',
     'inc/woocommerce.php',
+    'inc/cron-safety-net.php',
     'inc/filters.php',
     'inc/click-collect.php',
     'inc/ajax.php',
@@ -33,7 +34,7 @@ foreach ($includes as $file) {
     }
 }
 
-/* GitHub theme updates — admin only, zero frontend cost */
+/* GitHub theme updates â admin only, zero frontend cost */
 if (is_admin()) {
     $puc_path = mica_DIR . '/inc/lib/plugin-update-checker/load-v5p5.php';
     if (file_exists($puc_path)) {
@@ -76,6 +77,7 @@ function mica_get_all_categories() {
         'hide_empty' => true,
         'orderby' => 'name',
         'order' => 'ASC',
+        'exclude' => mica_get_excluded_cat_ids(),
     ]);
 
     $category_tree = [];
@@ -211,3 +213,45 @@ function mytheme_gtm_noscript() {
     <?php
 }
 add_action( 'wp_body_open', 'mytheme_gtm_noscript' );
+
+add_filter('action_scheduler_queue_runner_batch_size', function() { return 100; });
+add_filter('action_scheduler_queue_runner_concurrent_batches', function() { return 5; });
+
+// add_filter('woocommerce_webhook_payload', function($payload) {
+//     array_walk_recursive($payload, function(&$value) {
+//         if (is_string($value)) {
+//             $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+//         }
+//     });
+//     return $payload;
+// });
+
+add_filter('woocommerce_gla_product_sync_batch_size', function() {
+    return 20;
+});
+
+add_filter('action_scheduler_store_class', function($class) {
+    return 'ActionScheduler_DBStore';
+});
+
+// add_filter('woocommerce_shipping_debug_mode', '__return_false');
+add_filter('loyaltyplus_debug_logging', '__return_false');
+
+// add_action('woocommerce_order_status_processing', function($order_id, $order) {
+//     $meta = $order->get_meta('_order_shipping_data', true);
+//     error_log('[TCG DEBUG] Order #' . $order_id . ' _order_shipping_data: ' . $meta);
+// }, 5, 2);
+
+// add_action('woocommerce_checkout_order_created', function($order) {
+//     if (!$order->get_meta('_order_shipping_data', true)) {
+//         $shipping_methods = [];
+//         foreach ($order->get_items('shipping') as $item) {
+//             $shipping_methods[] = $item->get_method_id() . ':' . $item->get_instance_id();
+//         }
+//         if (!empty($shipping_methods)) {
+//             $order->update_meta_data('_order_shipping_data', json_encode($shipping_methods));
+//             $order->save();
+//             error_log('[TCG DEBUG] Set _order_shipping_data from shipping items: ' . json_encode($shipping_methods));
+//         }
+//     }
+// }, 20);

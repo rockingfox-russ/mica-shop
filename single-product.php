@@ -24,6 +24,8 @@ while ( have_posts() ) :
     $paint_name   = get_post_meta( $product_id, 'wpcf-paint-colour-name', true );
     $paint_code   = get_post_meta( $product_id, 'wpcf-paint-colour-code', true );
     $is_paint     = ! empty( $paint_colour );
+
+    $free_delivery_msg = get_theme_mod( 'mica_promo_stripe_free_delivery', '' );
 ?>
 
 
@@ -155,14 +157,14 @@ while ( have_posts() ) :
                         <button class="qty-btn" data-action="plus" aria-label="Increase">+</button>
                     </div>
                     <span class="product-card-stock <?php echo esc_attr( $stock['class'] ); ?>">
-                        <?php echo mica_icon( 'check' ); ?> <?php echo esc_html( $stock['label'] ); ?>
+                        <?php echo mica_icon( 'check' ); ?> <?php echo esc_html( $stock['class'] === 'in-stock' ? 'In stock online' : $stock['label'] ); ?>
                     </span>
                 </div>
                 <?php woocommerce_template_single_add_to_cart(); ?>
             </div>
             <?php else : ?>
                 <div class="woocommerce-info" style="margin-top:0;">
-                    <?php esc_html_e( 'Currently out of stock.', 'micaonline' ); ?>
+                    <?php esc_html_e( 'Currently out of stock online.', 'micaonline' ); ?>
                 </div>
             <?php endif; ?>
 
@@ -195,12 +197,18 @@ while ( have_posts() ) :
                 <li class="product-meta-item">
                     <?php echo mica_icon( 'store' ); ?>
                     <span><?php esc_html_e( 'Standard Delivery:', 'micaonline' ); ?>
-                    <strong><?php esc_html_e( '5-7 Working Days', 'micaonline' ); ?></strong></span>
+                    <strong><?php esc_html_e( '2-3 Working Days', 'micaonline' ); ?></strong></span>
                 </li>
                 <li class="product-meta-item">
                     <?php echo mica_icon( 'truck' ); ?>
                     <span><?php esc_html_e( 'Nationwide delivery available', 'micaonline' ); ?></span>
                 </li>
+                <?php if ( $free_delivery_msg ) : ?>
+                <li class="product-meta-item">
+                    <?php echo mica_icon( 'check' ); ?>
+                    <span><?php echo esc_html( $free_delivery_msg ); ?></span>
+                </li>
+                <?php endif; ?>
             </ul>
 
         </div><!-- .product-info -->

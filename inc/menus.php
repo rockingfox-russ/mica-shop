@@ -102,6 +102,7 @@ function mica_cats_to_dept_tree( int $parent ): array {
         'hide_empty' => true,
         'orderby'    => 'name',
         'order'      => 'ASC',
+        'exclude'    => mica_get_excluded_cat_ids(),
     ] );
 
     if ( is_wp_error( $cats ) || empty( $cats ) ) return [];
@@ -142,6 +143,7 @@ function mica_maybe_create_departments_menu(): void {
         'hide_empty' => true,
         'orderby'    => 'name',
         'order'      => 'ASC',
+        'exclude'    => mica_get_excluded_cat_ids(),
     ] );
     if ( is_wp_error( $top_cats ) ) $top_cats = [];
 
@@ -161,6 +163,7 @@ function mica_maybe_create_departments_menu(): void {
             'hide_empty' => true,
             'orderby'    => 'name',
             'order'      => 'ASC',
+            'exclude'    => mica_get_excluded_cat_ids(),
         ] );
         if ( is_wp_error( $subcats ) ) $subcats = [];
 

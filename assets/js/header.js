@@ -166,6 +166,7 @@
         deptSidebar?.classList.add( 'open' );
         deptOverlay?.classList.add( 'active' );
         document.body.style.overflow = 'hidden';
+        document.body.classList.add( 'drawer-open' );
         resetToLevel1();
     }
 
@@ -173,6 +174,7 @@
         deptSidebar?.classList.remove( 'open' );
         deptOverlay?.classList.remove( 'active' );
         document.body.style.overflow = '';
+        document.body.classList.remove( 'drawer-open' );
         resetToLevel1();
     }
 
@@ -233,8 +235,8 @@
     const mobileOverlay = document.getElementById( 'mobile-overlay' );
     const mobileClose   = document.getElementById( 'mobile-close' );
 
-    mobileToggle?.addEventListener(  'click', () => { mobileDrawer?.classList.add( 'open' );    mobileOverlay?.classList.add( 'active' );    document.body.style.overflow = 'hidden'; } );
-    mobileClose?.addEventListener(   'click', () => { mobileDrawer?.classList.remove( 'open' ); mobileOverlay?.classList.remove( 'active' ); document.body.style.overflow = ''; } );
-    mobileOverlay?.addEventListener( 'click', () => { mobileDrawer?.classList.remove( 'open' ); mobileOverlay?.classList.remove( 'active' ); document.body.style.overflow = ''; } );
+    mobileToggle?.addEventListener(  'click', () => { mobileDrawer?.classList.add( 'open' );    mobileOverlay?.classList.add( 'active' );    document.body.style.overflow = 'hidden'; document.body.classList.add( 'drawer-open' ); } );
+    mobileClose?.addEventListener(   'click', () => { mobileDrawer?.classList.remove( 'open' ); mobileOverlay?.classList.remove( 'active' ); document.body.style.overflow = ''; document.body.classList.remove( 'drawer-open' ); } );
+    mobileOverlay?.addEventListener( 'click', () => { mobileDrawer?.classList.remove( 'open' ); mobileOverlay?.classList.remove( 'active' ); document.body.style.overflow = ''; document.body.classList.remove( 'drawer-open' ); } );
 
 } )();

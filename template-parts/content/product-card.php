@@ -31,15 +31,29 @@ if ( $is_paint ) {
     // Determine lightness from the actual hex value so any colour works correctly
     $hex      = ltrim( $paint_colour, '#' );
     $is_light = false;
-    if ( ctype_xdigit( $hex ) && in_array( strlen( $hex ), [ 3, 6 ], true ) ) {
-        if ( strlen( $hex ) === 3 ) {
-            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-        }
-        $r = hexdec( substr( $hex, 0, 2 ) );
-        $g = hexdec( substr( $hex, 2, 2 ) );
-        $b = hexdec( substr( $hex, 4, 2 ) );
-        $is_light = ( 0.299 * $r + 0.587 * $g + 0.114 * $b ) / 255 > 0.55;
-    }
+    if ( ctype_xdigit( $hex ) && in_array( strlen( $hex ), [ 3, 6, 8 ], true ) ) {
+
+		// Convert #abc → #aabbcc
+		if ( strlen( $hex ) === 3 ) {
+			$hex =
+				$hex[0] . $hex[0] .
+				$hex[1] . $hex[1] .
+				$hex[2] . $hex[2];
+		}
+
+		// Support #RRGGBBAA by removing alpha channel
+		if ( strlen( $hex ) === 8 ) {
+			$hex = substr( $hex, 0, 6 );
+		}
+
+		$r = hexdec( substr( $hex, 0, 2 ) );
+		$g = hexdec( substr( $hex, 2, 2 ) );
+		$b = hexdec( substr( $hex, 4, 2 ) );
+
+		$brightness = ( 0.299 * $r + 0.587 * $g + 0.114 * $b ) / 255;
+
+		$is_light = $brightness > 0.55;
+	}
 
     if ( $is_light ) {
         $text_color = '#1a1a1a';
@@ -123,6 +137,9 @@ if ( $is_paint ) {
         <span class="product-card-stock <?php echo esc_attr( $stock['class'] ); ?>">
             <?php echo esc_html( $stock['label'] ); ?>
         </span>
+        <?php if ( ! $product->is_in_stock() ) : ?>
+            <span class="product-card-store-hint">Click View to check stock at your nearest store</span>
+        <?php endif; ?>
 
         <!-- <?php if ( $is_paint ) : ?>
             <div class="paint-colour-badge">

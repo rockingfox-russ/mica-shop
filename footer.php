@@ -61,8 +61,8 @@
                             printf( '<li><a href="%s">%s</a></li>', esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ), esc_html__( 'My Account', 'micaonline' ) );
                             printf( '<li><a href="%s">%s</a></li>', esc_url( get_permalink( wc_get_page_id( 'cart' ) ) ),      esc_html__( 'Cart', 'micaonline' ) );
                             printf( '<li><a href="%s">%s</a></li>', esc_url( get_permalink( wc_get_page_id( 'checkout' ) ) ),  esc_html__( 'Checkout', 'micaonline' ) );
-                            echo '<li><a href="' . esc_url( home_url( '/returns' ) )  . '">' . esc_html__( 'Returns Policy', 'micaonline' )   . '</a></li>';
-                            echo '<li><a href="' . esc_url( home_url( '/delivery' ) ) . '">' . esc_html__( 'Click &amp; Collect', 'micaonline' ) . '</a></li>';
+                            echo '<li><a href="' . esc_url( home_url( '/refund_returns' ) )  . '">' . esc_html__( 'Returns Policy', 'micaonline' )   . '</a></li>';
+//                             echo '<li><a href="' . esc_url( home_url( '/delivery' ) ) . '">' . esc_html__( 'Click &amp; Collect', 'micaonline' ) . '</a></li>';
                             echo '<li><a href="' . esc_url( home_url( '/faq' ) )      . '">' . esc_html__( 'FAQ', 'micaonline' )               . '</a></li>';
                             echo '</ul>';
                         },
@@ -97,6 +97,22 @@
     </footer>
 
 </div><!-- #page .site -->
+
+<?php
+$promo_img = get_theme_mod( 'mica_promo_btn_image', '' );
+if ( $promo_img ) :
+    $promo_url        = get_theme_mod( 'mica_promo_btn_url', '/shop/?on_sale=1' );
+    $promo_text        = get_theme_mod( 'mica_promo_btn_text', __( 'View Promotion', 'micaonline' ) );
+    $promo_bg_color    = get_theme_mod( 'mica_promo_btn_bg_color', '#FFFFFF' );
+    $promo_text_color  = get_theme_mod( 'mica_promo_btn_text_color', '#1A1A1A' );
+?>
+<a href="<?php echo esc_url( $promo_url ); ?>" class="promo-fab"
+   style="background:<?php echo esc_attr( $promo_bg_color ); ?>;"
+   aria-label="<?php echo esc_attr( $promo_text ); ?>">
+    <img src="<?php echo esc_url( $promo_img ); ?>" alt="" class="promo-fab-img">
+    <span class="promo-fab-text" style="color:<?php echo esc_attr( $promo_text_color ); ?>;"><?php echo esc_html( $promo_text ); ?></span>
+</a>
+<?php endif; ?>
 
 <?php wp_footer(); ?>
 </body>

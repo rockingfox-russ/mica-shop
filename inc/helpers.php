@@ -51,11 +51,11 @@ function mica_product_badges( WC_Product $product ): string {
  */
 function mica_stock_label( WC_Product $product ): array {
     if ( ! $product->is_in_stock() ) {
-        return [ 'label' => 'Out of stock', 'class' => 'no-stock' ];
+        return [ 'label' => 'Out of stock online', 'class' => 'no-stock' ];
     }
     $qty = $product->get_stock_quantity();
     if ( $qty !== null && $qty <= 5 ) {
-        return [ 'label' => 'Only ' . $qty . ' left', 'class' => 'low-stock' ];
+        return [ 'label' => 'Only ' . $qty . ' left online', 'class' => 'low-stock' ];
     }
     return [ 'label' => 'In stock', 'class' => 'in-stock' ];
 }
@@ -89,6 +89,10 @@ function mica_breadcrumbs(): void {
         $crumbs[] = '<a href="' . $shop_url . '">' . __( 'Shop', 'micaonline' ) . '</a>';
         $cats = get_the_terms( $post->ID, 'product_cat' );
         if ( $cats && ! is_wp_error( $cats ) ) {
+            $excluded = mica_get_excluded_cat_ids();
+            $cats     = array_filter( $cats, fn( $t ) => ! in_array( $t->term_id, $excluded, true ) );
+        }
+        if ( ! empty( $cats ) ) {
             $cat = array_shift( $cats );
             $crumbs[] = '<a href="' . get_term_link( $cat ) . '">' . esc_html( $cat->name ) . '</a>';
         }
@@ -213,6 +217,64 @@ add_action( 'created_product_cat', fn() => delete_transient( 'mica_cat_counts' )
 add_action( 'deleted_product_cat', fn() => delete_transient( 'mica_cat_counts' ) );
 
 /**
+ * Term ID(s) of the default WooCommerce "Uncategorised"/"Uncategorized" product_cat,
+ * detected by slug rather than a hardcoded ID since IDs aren't portable across environments.
+ * Used to keep this fallback term out of every customer-facing category listing.
+ *
+ * @return int[]
+ */
+function mica_get_excluded_cat_ids(): array {
+    static $ids = null;
+    if ( $ids !== null ) return $ids;
+
+    $ids = [];
+    foreach ( [ 'uncategorised', 'uncategorized' ] as $slug ) {
+        $term = get_term_by( 'slug', $slug, 'product_cat' );
+        if ( $term && ! is_wp_error( $term ) ) {
+            $ids[] = (int) $term->term_id;
+        }
+    }
+    return $ids;
+}
+
+/**
+ * Homepage hero slides, sourced from the "Homepage Hero Slides" Customizer
+ * section (up to 5 fixed slots). Falls back to a single slide built from the
+ * page's hero-title/hero-subtitle Types fields when none are configured, so
+ * the homepage is never empty.
+ *
+ * @return array[] [ 'image','title','subtitle','link','button_text' ] per slide.
+ */
+function mica_get_hero_slides(): array {
+    $slides = [];
+
+    for ( $i = 1; $i <= 5; $i++ ) {
+        $title = get_theme_mod( "mica_slide_{$i}_title", '' );
+        $image = get_theme_mod( "mica_slide_{$i}_image", '' );
+        if ( ! $title && ! $image ) continue; // empty slot — skip
+
+        $slides[] = [
+            'image'       => $image,
+            'title'       => $title,
+            'subtitle'    => get_theme_mod( "mica_slide_{$i}_subtitle", '' ),
+            'link'        => get_theme_mod( "mica_slide_{$i}_link", '' ) ?: get_permalink( wc_get_page_id( 'shop' ) ),
+            'button_text' => get_theme_mod( "mica_slide_{$i}_button_text", '' ) ?: __( 'Shop Now', 'micaonline' ),
+        ];
+    }
+
+    if ( ! empty( $slides ) ) return $slides;
+
+    // Fallback: single slide from the existing page-content hero fields.
+    return [ [
+        'image'       => '',
+        'title'       => function_exists( 'types_render_field' ) ? types_render_field( 'hero-title' ) : '',
+        'subtitle'    => function_exists( 'types_render_field' ) ? types_render_field( 'hero-subtitle' ) : '',
+        'link'        => get_permalink( wc_get_page_id( 'shop' ) ),
+        'button_text' => __( 'Shop All Products', 'micaonline' ),
+    ] ];
+}
+
+/**
  * Get WooCommerce categories with product count, nested.
  *
  * @param int $parent Parent term ID (0 = top level)
@@ -225,6 +287,7 @@ function mica_get_categories( int $parent = 0 ): array {
         'hide_empty' => true,
         'orderby'    => 'name',
         'order'      => 'ASC',
+        'exclude'    => mica_get_excluded_cat_ids(),
     ] ) ?: [];
 }
 

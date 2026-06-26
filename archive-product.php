@@ -15,7 +15,7 @@ $scope_id      = $current_cat ? $current_cat->term_id : 0;
 $active_filters = [
     'min_price'        => isset( $_GET['min_price'] ) && $_GET['min_price'] !== '' ? (float) $_GET['min_price'] : '',
     'max_price'        => isset( $_GET['max_price'] ) && $_GET['max_price'] !== '' ? (float) $_GET['max_price'] : '',
-    'orderby'          => sanitize_text_field( $_GET['orderby'] ?? 'menu_order' ),
+    'orderby'          => sanitize_text_field( $_GET['orderby'] ?? 'title' ),
     'on_sale'          => ! empty( $_GET['on_sale'] ),
     'in_stock'         => ! empty( $_GET['in_stock'] ),
     'out_of_stock'     => ! empty( $_GET['out_of_stock'] ),
@@ -100,7 +100,7 @@ if ( ! empty( $_GET['filter_local_attr'] ) && is_array( $_GET['filter_local_attr
                 <div class="shop-sort-wrap">
                     <label for="shop-sort" class="shop-sort-label sr-only"><?php esc_html_e( 'Sort by', 'micaonline' ); ?></label>
                     <select class="shop-sort-select" id="shop-sort" aria-label="<?php esc_attr_e( 'Sort by', 'micaonline' ); ?>">
-                        <option value="menu_order"  <?php selected( $active_filters['orderby'], 'menu_order' ); ?>><?php esc_html_e( 'Default', 'micaonline' ); ?></option>
+                        <option value="title"       <?php selected( $active_filters['orderby'], 'title' ); selected( $active_filters['orderby'], 'menu_order' ); ?>><?php esc_html_e( 'Name A–Z', 'micaonline' ); ?></option>
                         <option value="date"        <?php selected( $active_filters['orderby'], 'date' ); ?>><?php esc_html_e( 'Newest', 'micaonline' ); ?></option>
                         <option value="price"       <?php selected( $active_filters['orderby'], 'price' ); ?>><?php esc_html_e( 'Price: Low to High', 'micaonline' ); ?></option>
                         <option value="price-desc"  <?php selected( $active_filters['orderby'], 'price-desc' ); ?>><?php esc_html_e( 'Price: High to Low', 'micaonline' ); ?></option>
@@ -182,6 +182,7 @@ $filter_data = [
     'scopeCategoryId' => $scope_id,
     'activeFilters'   => $active_filters,
     'currentUrl'      => get_pagenum_link( 1, false ),
+    'searchQuery'     => get_search_query(),
 ];
 ?>
 <script>

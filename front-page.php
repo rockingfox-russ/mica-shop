@@ -14,43 +14,67 @@ $featured_query  = new WP_Query( $featured_args );
 $sale_args  = mica_build_query_args( [ 'on_sale' => true ] );
 $sale_args['posts_per_page'] = 8;
 $sale_query = new WP_Query( $sale_args );
+
+$hero_slides = mica_get_hero_slides();
+
+$promo_items = array_filter( [
+    get_theme_mod( 'mica_promo_stripe_free_delivery', '' ),
+    get_theme_mod( 'mica_promo_stripe_2', '🔒 Secure checkout with PayFast' ),
+    get_theme_mod( 'mica_promo_stripe_3', '📦 Delivery between 2-3 days' ),
+    get_theme_mod( 'mica_promo_stripe_4', '✅ 100% South African owned' ),
+] );
 ?>
 
 <div class="container" style="padding-top:var(--space-6);padding-bottom:var(--space-16);">
 
-    <!-- Hero Banner -->
-    <section class="hero-banner" style="margin-bottom:var(--space-8);">
-        <div class="hero-content">
-            <!-- <span class="hero-eyebrow">🏪 Click &amp; Collect Available</span> -->
-            <h1 class="hero-title">
-                Everything for<br>
-                <span class="accent">your home &amp; beyond</span>
-            </h1>
-            <p class="hero-subtitle">
-                Hardware, tools, garden, paint &amp; more — shop online, collect at your nearest Mica store.
-            </p>
-            <div class="hero-ctas">
-                <a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"
-                   class="btn btn-primary btn-lg">
-                    Shop All Products
-                </a>
-                <a href="#categories" class="btn btn-secondary btn-lg" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.4);">
-                    Browse Categories
-                </a>
+    <!-- Hero Slider -->
+    <section class="hero-slider" id="hero-slider" style="margin-bottom:var(--space-8);"
+              aria-roledescription="carousel" aria-label="<?php esc_attr_e( 'Promotional highlights', 'micaonline' ); ?>">
+        <div class="hero-slides-track">
+            <?php foreach ( $hero_slides as $i => $slide ) : ?>
+            <div class="hero-slide<?php echo $i === 0 ? ' active' : ''; ?>"
+                 <?php if ( $slide['image'] ) : ?>style="background-image:url('<?php echo esc_url( $slide['image'] ); ?>');"<?php endif; ?>>
+                <div class="hero-content">
+                    <h1 class="hero-title"><?php echo wp_kses_post( $slide['title'] ); ?></h1>
+                    <?php if ( $slide['subtitle'] ) : ?>
+                    <p class="hero-subtitle"><?php echo wp_kses_post( $slide['subtitle'] ); ?></p>
+                    <?php endif; ?>
+                    <div class="hero-ctas">
+                        <a href="<?php echo esc_url( $slide['link'] ); ?>" class="btn btn-primary btn-lg">
+                            <?php echo esc_html( $slide['button_text'] ); ?>
+                        </a>
+                        <a href="#categories" class="btn btn-secondary btn-lg" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.4);">
+                            Browse Categories
+                        </a>
+                    </div>
+                </div>
             </div>
+            <?php endforeach; ?>
         </div>
+
+        <?php if ( count( $hero_slides ) > 1 ) : ?>
+        <button type="button" class="hero-arrow hero-arrow-prev" aria-label="<?php esc_attr_e( 'Previous slide', 'micaonline' ); ?>"><?php echo mica_icon( 'chevron' ); ?></button>
+        <button type="button" class="hero-arrow hero-arrow-next" aria-label="<?php esc_attr_e( 'Next slide', 'micaonline' ); ?>"><?php echo mica_icon( 'chevron' ); ?></button>
+        <div class="hero-dots">
+            <?php foreach ( $hero_slides as $i => $slide ) : ?>
+            <button type="button" class="hero-dot<?php echo $i === 0 ? ' active' : ''; ?>" data-index="<?php echo (int) $i; ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Go to slide %d', 'micaonline' ), $i + 1 ) ); ?>"<?php echo $i === 0 ? ' aria-current="true"' : ''; ?>></button>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <div class="sr-only" aria-live="polite" id="hero-slide-announcer"></div>
     </section>
 
     <!-- Promo Stripe -->
+    <?php if ( ! empty( $promo_items ) ) : ?>
     <div class="promo-stripe" style="border-radius:var(--radius-xl);margin-bottom:var(--space-8);padding:var(--space-3) var(--space-6);">
         <div class="promo-stripe-inner">
-            <!-- <span class="promo-stripe-item">🚚 Free click &amp; collect at all stores</span> -->
-            <span class="promo-stripe-item">🔒 Secure checkout with PayFast</span>
-            <!-- <span class="promo-stripe-item">🛠️ Trade accounts available</span> -->
-            <span class="promo-stripe-item">📦 Delivery between 5-7 days</span>
-            <span class="promo-stripe-item">✅ 100% South African owned</span>
+            <?php foreach ( $promo_items as $item ) : ?>
+            <span class="promo-stripe-item"><?php echo esc_html( $item ); ?></span>
+            <?php endforeach; ?>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Categories -->
     <section id="categories" style="margin-bottom:var(--space-10);">

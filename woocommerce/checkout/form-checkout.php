@@ -143,67 +143,14 @@ $checkout = WC()->checkout();
                 <div class="order-summary-header">
                     <?php esc_html_e( 'Order Summary', 'micaonline' ); ?>
                 </div>
-                <div class="order-summary-items">
-                    <?php foreach ( WC()->cart->get_cart() as $item ) :
-                        $p = $item['data'];
-                        if ( ! $p ) continue;
+                <div id="order_review" class="woocommerce-checkout-review-order">
+                    <?php
+                    // Call the function directly (not the woocommerce_checkout_order_review
+                    // action) — WC core also hooks woocommerce_checkout_payment onto that
+                    // action, which would render a second Payment/Place order box here
+                    // since this theme already renders payment separately above.
+                    woocommerce_order_review();
                     ?>
-                    <div class="order-summary-item">
-                        <div class="order-summary-item-img">
-                            <?php echo $p->get_image( 'thumbnail' ); ?>
-                        </div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:.8rem;font-weight:600;line-height:1.3;color:var(--clr-text);">
-                                <?php echo esc_html( $p->get_name() ); ?>
-                                <span style="color:var(--clr-text-muted);font-weight:400;"> &times; <?php echo $item['quantity']; ?></span>
-                            </div>
-                        </div>
-                        <div style="font-size:.875rem;font-weight:700;color:var(--clr-orange);flex-shrink:0;">
-                            <?php echo WC()->cart->get_product_subtotal( $p, $item['quantity'] ); ?>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="order-summary-totals">
-                    <?php do_action( 'woocommerce_review_order_before_cart_contents' ); ?>
-
-                    <div class="summary-row">
-                        <span><?php esc_html_e( 'Subtotal', 'micaonline' ); ?></span>
-                        <span><?php echo WC()->cart->get_cart_subtotal(); ?></span>
-                    </div>
-
-                    <?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
-                    <div class="summary-row" style="color:var(--clr-success);">
-                        <span><?php esc_html_e( 'Coupon:', 'micaonline' ); ?> <?php echo esc_html( $code ); ?></span>
-                        <span>-<?php wc_cart_totals_coupon_html( $coupon ); ?></span>
-                    </div>
-                    <?php endforeach; ?>
-
-                    <?php foreach ( WC()->cart->get_fees() as $fee ) : ?>
-                    <div class="summary-row">
-                        <span><?php echo esc_html( $fee->name ); ?></span>
-                        <span><?php wc_cart_totals_fee_html( $fee ); ?></span>
-                    </div>
-                    <?php endforeach; ?>
-
-                    <?php if ( WC()->cart->needs_shipping() ) : ?>
-                    <div class="summary-row">
-                        <span><?php esc_html_e( 'Shipping', 'micaonline' ); ?></span>
-                        <span><?php wc_cart_totals_shipping_html(); ?></span>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
-                    <div class="summary-row">
-                        <span><?php esc_html_e( 'Tax', 'micaonline' ); ?></span>
-                        <span><?php wc_cart_totals_taxes_total_html(); ?></span>
-                    </div>
-                    <?php endif; ?>
-
-                    <div class="summary-row total">
-                        <span><?php esc_html_e( 'Total', 'micaonline' ); ?></span>
-                        <span class="amount"><?php wc_cart_totals_order_total_html(); ?></span>
-                    </div>
                 </div>
             </div><!-- .order-summary -->
         </div><!-- right column -->

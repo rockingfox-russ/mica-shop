@@ -99,6 +99,18 @@
     } );
   }
 
+  /* ── Build the store locator URL for a given store name ──
+   * Store locator is indexed by the store's "place" name only, so strip off
+   * the generic "Mica"/"MegaMica"/"Paint Centre" suffix before slugifying,
+   * e.g. "Bedford Mica Paint Centre" → "Bedford". */
+  function storeLocatorUrl( storeName ) {
+    const cutRe = /\b(megamica|mica|paint\s*centre?|painters?\s*centres?)\b/i;
+    const match = cutRe.exec( storeName );
+    const place = ( match ? storeName.slice( 0, match.index ) : storeName ).trim();
+    const slug  = place.replace( /\s+/g, '-' );
+    return `https://www.mica.co.za/store-locator/?wpv_post_search=${ encodeURIComponent( slug ) }`;
+  }
+
   /* ── Build store row HTML ── */
   function storeRowHTML( store, badge ) {
     const levelClass  = 'dot-'    + store.level;
@@ -112,6 +124,7 @@
         <div class="stock-store-info">
           <div class="stock-store-name">${ esc( store.store_name ) }${ badgeHTML }</div>
           <div class="stock-store-city">${ esc( store.city ) }${ store.hours ? ' · ' + esc( store.hours ) : '' }${ dist ? ' - ' + dist : '' }</div>
+          <a class="stock-store-view-link" href="${ esc( storeLocatorUrl( store.store_name ) ) }" target="_blank" rel="noopener">View store</a>
         </div>
         <div class="stock-store-status ${ statusClass }">
           ${ esc( store.label ) }
@@ -144,7 +157,7 @@
 
     if ( nearest.length ) {
       html += `<div class="stock-section-label">Nearest to you</div>`;
-      html += nearest.map( ( s, i ) => storeRowHTML( s, i === 0 ? 'Closest' : null ) ).join( '' );
+      html += nearest.map( ( s, i ) => storeRowHTML( s, i === 0 ? ' Closest' : null ) ).join( '' );
     }
 
     if ( rest.length ) {
@@ -156,21 +169,23 @@
   }
 
   /* ── Fetch stock + geolocation in parallel ── */
-  function fetchStock( productId, sku, nonce ) {
+  function fetchStock( productId, sku, fallbackNonce ) {
     openModal();
     showLoading();
 
-    const formData = new FormData();
-    formData.append( 'action',     'mica_check_store_stock' );
-    formData.append( 'product_id', productId );
-    formData.append( 'sku',        sku );
-    formData.append( 'nonce',      nonce );
+    const stockPromise = ( window.micaNonceReady || Promise.resolve() ).then( () => {
+      const formData = new FormData();
+      formData.append( 'action',     'mica_check_store_stock' );
+      formData.append( 'product_id', productId );
+      formData.append( 'sku',        sku );
+      formData.append( 'nonce',      micaData.stockNonce || fallbackNonce );
 
-    const stockPromise = fetch( micaData.ajaxUrl, {
-      method: 'POST',
-      body: formData,
-      credentials: 'same-origin',
-    } ).then( r => r.json() );
+      return fetch( micaData.ajaxUrl, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+      } ).then( r => r.json() );
+    } );
 
     Promise.all( [ stockPromise, getUserLocation() ] )
       .then( ( [ data, userPos ] ) => {

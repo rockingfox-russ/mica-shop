@@ -2,6 +2,7 @@
 <html <?php language_attributes(); ?>>
 
 <head>
+	
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="profile" href="https://gmpg.org/xfn/11">
@@ -10,9 +11,28 @@
 
     <?php wp_head(); ?>
 
+	<!-- Meta Pixel Code -->
+	<script>
+		!function(f,b,e,v,n,t,s)
+		{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+		n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+		if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+		n.queue=[];t=b.createElement(e);t.async=!0;
+		t.src=v;s=b.getElementsByTagName(e)[0];
+		s.parentNode.insertBefore(t,s)}(window, document,'script',
+		'https://connect.facebook.net/en_US/fbevents.js');
+		fbq('init', '1966174426984987');
+		fbq('track', 'PageView');
+		</script>
+		<noscript><img height="1" width="1" style="display:none"
+		src="https://www.facebook.com/tr?id=1966174426984987&ev=PageView&noscript=1"
+	/></noscript>
+	<!-- End Meta Pixel Code -->
+	
 </head>
 
 <body <?php body_class(); ?>>
+	
 <?php wp_body_open(); ?>
 
 <div class="site" id="page">
@@ -63,23 +83,6 @@
                     <form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
                         <input type="hidden" name="post_type" value="product">
 
-                        <div class="search-cat-wrap">
-                            <select name="product_cat" id="search-category" aria-label="Category">
-                                <option value="">Category</option>
-                                <?php
-                                $categories = get_terms( [ 'taxonomy' => 'product_cat', 'parent' => 0, 'hide_empty' => true ] );
-                                $current_cat = isset( $_GET['product_cat'] ) ? sanitize_text_field( $_GET['product_cat'] ) : '';
-                                foreach ( $categories as $cat ) : ?>
-                                    <option value="<?php echo esc_attr( $cat->slug ); ?>" <?php selected( $current_cat, $cat->slug ); ?>>
-                                        <?php echo esc_html( $cat->name ); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <?php echo mica_icon( 'chevron', 'search-cat-chevron' ); ?>
-                        </div>
-
-                        <div class="search-divider"></div>
-
                         <!-- <?php echo mica_icon( 'search', 'search-icon' ); ?> -->
                         <input type="search"
                                name="s"
@@ -101,8 +104,8 @@
                         <?php if (is_user_logged_in()) : ?>
                         <a class="action-link " href="<?php echo esc_url(wc_get_account_endpoint_url('dashboard')); ?>">My Account</a>
                     <?php else : ?>
-                        <a class="action-link " href="<?php echo esc_url(wp_login_url()); ?>">Sign in</a>
-                        <a class="action-link " href="<?php echo esc_url(wp_registration_url()); ?>">Register</a>
+                        <a class="action-link " href="<?php echo esc_url(wc_get_page_permalink('myaccount')); ?>">Sign in</a>
+                        <a class="action-link " href="<?php echo esc_url(wc_get_page_permalink('myaccount')); ?>">Register</a>
                     <?php endif; ?>
                     <a href="<?php echo esc_url(wc_get_cart_url()); ?>" class="action-link cart-link">
                         <span class="action-icon">🛒</span>

@@ -28,7 +28,7 @@
     const f = {
       min_price:        document.getElementById( 'filter-min-price' )?.value.trim() || '',
       max_price:        document.getElementById( 'filter-max-price' )?.value.trim() || '',
-      orderby:          sortSelect?.value || 'menu_order',
+      orderby:          sortSelect?.value || 'title',
       on_sale:          document.getElementById( 'filter-on-sale' )?.checked        || false,
       in_stock:         document.getElementById( 'filter-in-stock' )?.checked       || false,
       out_of_stock:     document.getElementById( 'filter-out-of-stock' )?.checked   || false,
@@ -153,7 +153,7 @@
     } );
     document.querySelectorAll( 'input[name="filter_tag[]"], input[name^="filter_attr"], input[name^="filter_local_attr"]' )
       .forEach( cb => cb.checked = false );
-    if ( sortSelect ) sortSelect.value = 'menu_order';
+    if ( sortSelect ) sortSelect.value = 'title';
     syncSliderFromInputs();
     runFilters();
   }
@@ -183,31 +183,38 @@
     const f = collectFilters();
     renderActiveTags( f );
 
-    const body = new FormData();
-    body.append( 'action',      'mica_filter_products' );
-    body.append( 'nonce',       micaData.nonce );
-    body.append( 'category_id', scopeCategoryId );
-    body.append( 'orderby',     f.orderby );
-    body.append( 'paged',       page );
-
-    if ( f.min_price !== '' ) body.append( 'min_price', f.min_price );
-    if ( f.max_price !== '' ) body.append( 'max_price', f.max_price );
-    if ( f.on_sale )          body.append( 'on_sale',       1 );
-    if ( f.in_stock )         body.append( 'in_stock',      1 );
-    if ( f.out_of_stock )     body.append( 'out_of_stock',  1 );
-
-    f.tags.forEach( v => body.append( 'tags[]', v ) );
-
-    Object.entries( f.attributes ).forEach( ( [ t, vals ] ) => {
-      vals.forEach( v => body.append( `attributes[${ t }][]`, v ) );
-    } );
-    Object.entries( f.local_attributes ).forEach( ( [ t, vals ] ) => {
-      vals.forEach( v => body.append( `local_attributes[${ t }][]`, v ) );
-    } );
-
     setLoading( true );
 
-    fetch( micaData.ajaxUrl, { method: 'POST', body, credentials: 'same-origin' } )
+    ( window.micaNonceReady || Promise.resolve() ).then( () => {
+      const body = new FormData();
+      body.append( 'action',      'mica_filter_products' );
+      body.append( 'nonce',       micaData.nonce );
+      body.append( 'category_id', scopeCategoryId );
+      body.append( 'orderby',     f.orderby );
+      body.append( 'paged',       page );
+      body.append( 'current_url', window.location.href );
+
+      // Preserve search context so AJAX pagination doesn't drop the query term
+      const searchQuery = window.micaFilterState?.searchQuery || '';
+      if ( searchQuery ) body.append( 'search_query', searchQuery );
+
+      if ( f.min_price !== '' ) body.append( 'min_price', f.min_price );
+      if ( f.max_price !== '' ) body.append( 'max_price', f.max_price );
+      if ( f.on_sale )          body.append( 'on_sale',       1 );
+      if ( f.in_stock )         body.append( 'in_stock',      1 );
+      if ( f.out_of_stock )     body.append( 'out_of_stock',  1 );
+
+      f.tags.forEach( v => body.append( 'tags[]', v ) );
+
+      Object.entries( f.attributes ).forEach( ( [ t, vals ] ) => {
+        vals.forEach( v => body.append( `attributes[${ t }][]`, v ) );
+      } );
+      Object.entries( f.local_attributes ).forEach( ( [ t, vals ] ) => {
+        vals.forEach( v => body.append( `local_attributes[${ t }][]`, v ) );
+      } );
+
+      return fetch( micaData.ajaxUrl, { method: 'POST', body, credentials: 'same-origin' } );
+    } )
       .then( r => r.json() )
       .then( data => {
         if ( ! data.success ) throw new Error( 'Filter failed' );
@@ -500,6 +507,7 @@
       overlay?.classList.add( 'open' );
       btn?.setAttribute( 'aria-expanded', 'true' );
       document.body.style.overflow = 'hidden';
+      document.body.classList.add( 'drawer-open' );
     };
     const shut = () => {
       if ( sidebar && sidebarParent ) sidebarParent.insertBefore( sidebar, sidebarNext );
@@ -507,6 +515,7 @@
       overlay?.classList.remove( 'open' );
       btn?.setAttribute( 'aria-expanded', 'false' );
       document.body.style.overflow = '';
+      document.body.classList.remove( 'drawer-open' );
     };
 
     btn?.addEventListener( 'click', open );

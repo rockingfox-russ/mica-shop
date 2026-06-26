@@ -144,7 +144,7 @@ get_header();
     </div>
 
     <!-- FAQ Section -->
-    <!-- <section class="contact-faq">
+    <section class="contact-faq">
         <h2>Frequently Asked Questions</h2>
         <div class="faq-list">
 
@@ -180,7 +180,7 @@ get_header();
             <?php endforeach; ?>
 
         </div>
-    </section> -->
+    </section>
 
 </div><!-- .container -->
 

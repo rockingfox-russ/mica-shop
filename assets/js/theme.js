@@ -284,7 +284,7 @@
       toast.id = 'mica-toast';
       toast.style.cssText = [
         'position:fixed',
-        'bottom:24px',
+        'bottom:96px',
         'right:24px',
         'background:var(--clr-text)',
         'color:#fff',
@@ -328,8 +328,27 @@
     document.head.appendChild( style );
   }
 
+  /* ── Fresh AJAX nonces ──
+   * Page caches can serve markup older than WP's 24h nonce lifetime, which
+   * breaks filters/pagination/stock-check with "Security check failed".
+   * Fetch live nonces once per load rather than trusting the cached ones. */
+  function refreshNonces() {
+    const body = new FormData();
+    body.append( 'action', 'mica_get_nonces' );
+    return fetch( micaData.ajaxUrl, { method: 'POST', body, credentials: 'same-origin' } )
+      .then( r => r.json() )
+      .then( data => {
+        if ( data.success ) {
+          micaData.nonce      = data.data.filter_nonce;
+          micaData.stockNonce = data.data.stock_nonce;
+        }
+      } )
+      .catch( () => {} );
+  }
+
   /* ── Init on DOM ready ── */
   function init() {
+    window.micaNonceReady = refreshNonces();
     initDeliveryToggle();
     initProductGallery();
     initQuantityStepper();

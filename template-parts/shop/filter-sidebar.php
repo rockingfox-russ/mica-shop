@@ -224,8 +224,9 @@ if ( wp_is_mobile() ) {
         </div>
     </div>
 
-    <?php /* ── 5. Attributes — each collapsed ── */ ?>
-    <?php foreach ( $attributes as $taxonomy => $attr_data ) :
+    <?php /* ── 5. Attributes — commented out until cascading filter UX is built ── */ ?>
+    <?php /*
+    foreach ( $attributes as $taxonomy => $attr_data ) :
         $is_local   = ! empty( $attr_data['terms'][0]['is_local'] );
         $term_count = count( $attr_data['terms'] );
     ?>
@@ -260,7 +261,6 @@ if ( wp_is_mobile() ) {
                            data-term="<?php echo esc_attr( $term['slug'] ); ?>"
                            <?php if ( $is_local ) echo 'data-local="1"'; ?>>
                     <span class="filter-check-name"><?php echo esc_html( mica_title_case( $term['name'] ) ); ?></span>
-                    <!-- <span class="filter-check-count"><?php echo (int) $term['count']; ?></span> -->
                 </label>
                 <?php endforeach; ?>
                 <?php if ( $term_count > 5 ) : ?>
@@ -273,7 +273,8 @@ if ( wp_is_mobile() ) {
             </div>
         </div>
     </div>
-    <?php endforeach; ?>
+    <?php endforeach;
+    */ ?>
 
 </div><!-- .filter-panel -->
 </aside>
